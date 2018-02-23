@@ -1,7 +1,16 @@
 {
     "intents": [
         {
-            "intent": "HelloWorldIntent"
+            "intent": "StartIntent"
+        },
+        {
+            "intent": "GuessIntent",
+            "slots": [
+                {
+                    "name": "answer",
+                    "type": "AMAZON.Number"
+                }
+            ]
         }
     ]
 }

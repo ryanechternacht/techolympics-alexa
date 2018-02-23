@@ -1,1 +1,6 @@
-HelloWorldIntent Hello World
+StartIntent Start
+StartIntent Start the game
+
+GuessIntent I guess {answer}
+GuessIntent {answer}
+GuessIntent Is it {answer}

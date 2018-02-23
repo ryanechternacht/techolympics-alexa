@@ -1,8 +1,7 @@
 # techolympics-alexa
 
-Hello, welcome to a demo app showing how you can build apps on Amazon's Alexa
+Welcome to a demo app showing how you can build apps on Amazon's Alexa
 platform and deploy them to a real Amazon Alexa (or test them out online). 
-
 
 ## Instructios
 
@@ -31,3 +30,9 @@ step 2
 9-11 skip
 12 use utterances.txt (not the data they provide)
 
+
+
+
+## testing
+
+when testing, use "four" not "4"
