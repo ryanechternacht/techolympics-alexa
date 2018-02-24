@@ -1,5 +1,11 @@
-'use strict';
-const Alexa = require('alexa-sdk');
+var Alexa = require('alexa-sdk'), 
+    _ = require('underscore'), 
+    AWS = require('aws-sdk'),
+    DOC = require('dynamodb-doc');
+
+var onFailure = function () {
+    self.emit(':tell', 'Something went wrong. Sorry');
+};
 
 exports.handler = function(event, context, callback) {
     const alexa = Alexa.handler(event, context);
@@ -11,41 +17,122 @@ const handlers = {
     'LaunchRequest': function() {
         this.emit('Welcome');
     },
-    'StartIntent': function() {
-        this.emit('Welcome');
-    },
     'Welcome': function() {
-        this.attributes["number"] = Math.floor(Math.random() * 10);
-        
-        this.response.speak("Hello. Welcome to the Guess the Number. " + 
-            "I've chosen a number between 1 and 10. Make a guess.")
-            .listen("Please make a guess");
+        var message = 'Tell me about a test you just completed. Or ask for your grade in a specific subject.'
+
+        this.response.speak(message);
         this.emit(':responseReady');
     },
-    'GuessIntent': function() {
-        var guess = this.event.request.intent.slots.answer.value;
+    'RecordTestIntent': function () { 
+        var grade = parseInt(this.event.request.intent.slots.grade.value);
+        var subject = this.event.request.intent.slots.subject.value;
 
-        if(guess > this.attributes.number) {
-            this.emit('TooHigh');
-        } else if(guess < this.attributes.number) { 
-            this.emit('TooLow');
-        } else if(guess == this.attributes.number) {
-            this.emit('Correct');
-        }
+        console.log('RecordTestIntent', grade, subject);
+        var self = this;
+        var onSuccess = function () {
+            //TODO add in personalized messages for grade 
+            // e.g. a >=90 'good job'. <=60 'ouch'. hi 
+            if (grade >= 90){
+                self.emit(':tell', 'Good job!');
+            }
+            else if (grade < 60){
+                self.emit(':tell', 'You suck.');
+            }
+            else{
+                self.emit(':tell', 'Got it. Thanks.')
+            }
+        };
+
+        saveGrade(subject, grade, onSuccess, onFailure);
     },
-    'TooHigh': function() {
-        this.response.speak("That's too high. Guess again.")
-            .listen("Guess again.");
-        this.emit(":responseReady");
-    },
-    'TooLow': function() {
-        this.response.speak("Nope, too low. Please guess again.")
-            .listen("Please guess again.");
-        this.emit(":responseReady");
-    },
-    'Correct': function() {
-        this.response.speak("Great job. Let's play again sometime");
-        this.emit(":responseReady");
+    'GetGradeIntent': function () {
+        var subject = this.event.request.intent.slots.subject.value;
+
+        console.log('GetGradeIntent', subject);
+        var self = this;
+        var onSuccess = function (grades, average) {
+            console.log('done saving');
+            //TODO convert this to a letter grade as well 
+            // e.g. a >=90 'Thats an A'
+            if(grades) {
+                var message = 'In ' + subject + ' you currently have a ' + average + ' over ' + grades + ' tests';
+                self.emit(':tell', message);
+            } else {
+                var message = "You don't have any grades recorded for " + subject;
+                self.emit(':tell', message);
+            }
+        };
+
+        getGrade(subject, onSuccess, onFailure);
     }
 };
 
+function saveGrade(subject, grade, onSuccess, onFailure) {
+    AWS.config.loadFromPath('./config.json');
+    
+    var docClient = new DOC.DynamoDB();
+
+    // get existing subject data (if any)
+    var params = {};
+    params.TableName = 'techolympics';
+    params.Key = { subject: subject };
+
+    var doc = docClient.getItem(params, function (err, doc) {
+        if (err) {
+            console.log(err, doc);
+            onFailure();
+        } else {
+            var item = doc && doc.Item;
+            if (!item) {
+                item = {
+                    subject: subject,
+                    scores: []
+                };
+            }
+
+            item.scores.push(grade);
+
+            var params = {
+                Item: item,
+                TableName: 'techolympics'
+            };
+
+            docClient.putItem(params, function (err2, doc2) {
+                if (err2) {
+                    console.log(err2, doc2);
+                    onFailure();
+                } else {
+                    onSuccess();
+                }
+            });
+        };
+    });
+}
+
+function getGrade(subject, onSuccess, onFailure) {
+    AWS.config.loadFromPath('./config.json');
+    
+    var docClient = new DOC.DynamoDB();
+
+    // get existing subject data (if any)
+    var params = {};
+    params.TableName = 'techolympics';
+    params.Key = { subject: subject };
+
+    var doc = docClient.getItem(params, function (err, doc) {
+        if (err) {
+            console.log(err, doc);
+            onFailure();
+        } else {
+            var item = doc && doc.Item;
+            if (!item || item.scores.length == 0) {
+                onSuccess(0);
+            } else {
+                var sum = _.reduce(item.scores, (sum, x) => sum + x);
+                var grades = item.scores.length;
+                var average = Math.round(sum / grades);
+                onSuccess(grades, average);
+            }
+        }
+    });
+}

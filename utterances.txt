@@ -1,6 +1,11 @@
-StartIntent Start
-StartIntent Start the game
+RecordTestIntent I just got a {grade} on a {subject} test
+RecordTestIntent I just got an {grade} on a {subject} test
+RecordTestIntent I just got a {grade} on an {subject} test
+RecordTestIntent I just got an {grade} on an {subject} test
+RecordTestIntent I just got a {grade} in {subject}
+RecordTestIntent I just got an {grade} in {subject}
 
-GuessIntent I guess {answer}
-GuessIntent {answer}
-GuessIntent Is it {answer}
+GetGradeIntent What's my grade in {subject}
+GetGradeIntent What's my average in {subject}
+GetGradeIntent How am I doing in {subject}
+GetGradeIntent Whats my {subject} grade

@@ -1,14 +1,27 @@
 {
     "intents": [
         {
-            "intent": "StartIntent"
+            "intent": "HelpIntent"
         },
         {
-            "intent": "GuessIntent",
+            "intent": "RecordTestIntent",
             "slots": [
                 {
-                    "name": "answer",
-                    "type": "AMAZON.Number"
+                    "name": "grade",
+                    "type": "AMAZON.NUMBER"
+                },
+                {
+                    "name": "subject",
+                    "type": "subjects"
+                }
+            ]
+        },
+        {
+            "intent": "GetGradeIntent",
+            "slots": [
+                {
+                    "name": "subject",
+                    "type": "subjects"
                 }
             ]
         }
