@@ -32,7 +32,15 @@ const handlers = {
         var onSuccess = function () {
             //TODO switch to the right response based on how good the grade is 
             // e.g. a >=90 'great grade'. <=60 'bad grade'. 
-
+            if(grade<=69){
+                self.emit("BadGradeResponse")
+            } 
+            else if(grade<=89){
+                self.emit("OkGradeResponse")
+            }
+            else {
+                self.emit("GreatGradeResponse")
+            }
             // self.emit('state')
 
         };
@@ -40,14 +48,17 @@ const handlers = {
         saveGrade(subject, grade, onSuccess, onFailure);
     },
     'GreatGradeResponse': function() {
-        
+        this.response.speak("Amazing! Someone took their NyQuill this morning");
+        this.emit(':responseReady');
         // this.emit(':responseReady');
     },
     'OkGradeResponse': function() {
-
+        this.response.speak("Eh, that's alright I guess.... Try harder");
+        this.emit(':responseReady');
     },
     'BadGradeResponse': function() {
-
+        this.response.speak("Nice try. We'll get 'em next time boys. Oof");
+        this.emit(':responseReady');
     },
     'GetGradeIntent': function () {
         var subject = this.event.request.intent.slots.subject.value;
