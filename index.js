@@ -30,20 +30,24 @@ const handlers = {
         console.log('RecordTestIntent', grade, subject);
         var self = this;
         var onSuccess = function () {
-            //TODO add in personalized messages for grade 
-            // e.g. a >=90 'good job'. <=60 'ouch'. hi 
-            if (grade >= 90){
-                self.emit(':tell', 'Good job!');
-            }
-            else if (grade < 60){
-                self.emit(':tell', 'You suck.');
-            }
-            else{
-                self.emit(':tell', 'Got it. Thanks.')
-            }
+            //TODO switch to the right response based on how good the grade is 
+            // e.g. a >=90 'great grade'. <=60 'bad grade'. 
+
+            // self.emit('state')
+
         };
 
         saveGrade(subject, grade, onSuccess, onFailure);
+    },
+    'GreatGradeResponse': function() {
+        
+        // this.emit(':responseReady');
+    },
+    'OkGradeResponse': function() {
+
+    },
+    'BadGradeResponse': function() {
+
     },
     'GetGradeIntent': function () {
         var subject = this.event.request.intent.slots.subject.value;

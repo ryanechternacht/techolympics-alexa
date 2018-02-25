@@ -36,3 +36,8 @@ step 2
 ## testing
 
 when testing, use "four" not "4"
+
+## Dynamo DB
+
+config.json - need this file
+config_format.json - these aren't real keys, but should give you an idea what they look like
